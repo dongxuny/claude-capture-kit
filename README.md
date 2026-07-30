@@ -22,76 +22,101 @@ Anything else (Opus 5, Sonnet, `medium` effort, etc.) is not acceptable.
 
 ---
 
-## Run it — macOS
+## Setup — macOS
 
-**One-time**: install mitmproxy.
+**One-time (install & trust mitmproxy):**
 
 ```bash
+# 1) Install mitmproxy
 brew install mitmproxy
+
+# 2) Generate the CA cert (run mitmdump once, then Ctrl+C)
+mitmdump &
+sleep 3
+kill $!
+
+# 3) Trust the CA cert system-wide (needs your admin password)
+sudo security add-trusted-cert -d -r trustRoot \
+  -k /Library/Keychains/System.keychain \
+  ~/.mitmproxy/mitmproxy-ca-cert.pem
 ```
 
-Don't have Homebrew? Install it first with `/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"`.
+## Run it — macOS
 
-Then extract the kit zip, `cd` into the folder, and open **two Terminal windows**.
+Extract the kit zip and open **two Terminal windows** in the extracted folder.
 
 **Terminal A** — start the proxy (keep this window open):
 
 ```bash
-mitmdump --mode reverse:https://api.anthropic.com --listen-port 47821 -s ./save_raw.py
+mitmdump --listen-port 47821 -s ./save_raw.py
 ```
 
-**Terminal B** — start Claude (pick one):
+**Terminal B** — start Claude with the proxy (pick one):
 
 ```bash
 # Claude Code CLI
-ANTHROPIC_BASE_URL=http://localhost:47821 claude --model claude-opus-4-8
+HTTPS_PROXY=http://localhost:47821 claude --model claude-opus-4-8
 
-# Claude Code Desktop (fully quit it first with pkill -f Claude)
-ANTHROPIC_BASE_URL=http://localhost:47821 /Applications/Claude.app/Contents/MacOS/Claude &
+# Claude Code Desktop (fully quit it first with Cmd+Q)
+HTTPS_PROXY=http://localhost:47821 open -a "Claude"
 
-# Cursor (fully quit it first with pkill -f Cursor; requires Custom API Key with Anthropic in settings)
-ANTHROPIC_BASE_URL=http://localhost:47821 /Applications/Cursor.app/Contents/MacOS/Cursor &
+# Cursor (fully quit it first with Cmd+Q)
+HTTPS_PROXY=http://localhost:47821 open -a "Cursor"
 ```
 
 Inside Claude, run `/effort high` to switch to high-effort thinking.
 
-## Run it — Windows
+---
 
-Extract the kit zip. It already contains `mitmdump.exe` — no separate install needed.
+## Setup — Windows
+
+**One-time (trust mitmproxy CA):**
+
+The kit already includes `mitmdump.exe` — no separate install.
+
+```powershell
+# 1) Generate the CA cert (start mitmdump once, then Ctrl+C)
+.\mitmdump.exe
+# Wait ~5 seconds after "listening" appears, then Ctrl+C
+
+# 2) Trust the CA cert (elevated PowerShell)
+Import-Certificate -FilePath "$env:USERPROFILE\.mitmproxy\mitmproxy-ca-cert.cer" `
+  -CertStoreLocation Cert:\LocalMachine\Root
+```
+
+## Run it — Windows
 
 Open **two PowerShell windows** in the extracted folder.
 
 **Window A** — start the proxy (keep this window open):
 
 ```powershell
-.\mitmdump.exe --mode reverse:https://api.anthropic.com --listen-port 47821 -s .\save_raw.py
+.\mitmdump.exe --listen-port 47821 -s .\save_raw.py
 ```
 
-If SmartScreen blocks it: right-click `mitmdump.exe` → Properties → check **Unblock** → OK. Or click **More info → Run anyway** on the SmartScreen dialog.
+If SmartScreen blocks `mitmdump.exe`: right-click → Properties → check **Unblock** → OK.
 
 **Window B** — start Claude:
 
 For **Claude Code CLI**:
 
 ```powershell
-$env:ANTHROPIC_BASE_URL="http://localhost:47821"; claude --model claude-opus-4-8
+$env:HTTPS_PROXY="http://localhost:47821"; claude --model claude-opus-4-8
 ```
 
 For **Claude Code Desktop / Cursor**, set the env var user-wide, then launch normally from the Start Menu (close any running instance first):
 
 ```powershell
 # Turn capture ON
-[Environment]::SetEnvironmentVariable("ANTHROPIC_BASE_URL", "http://localhost:47821", "User")
+[Environment]::SetEnvironmentVariable("HTTPS_PROXY", "http://localhost:47821", "User")
 
 # ... close Claude / Cursor if open, then launch them from Start Menu ...
 
 # Turn capture OFF when done (and restart Claude / Cursor)
-[Environment]::SetEnvironmentVariable("ANTHROPIC_BASE_URL", $null, "User")
+[Environment]::SetEnvironmentVariable("HTTPS_PROXY", $null, "User")
 ```
 
 Inside Claude, run `/effort high` to switch to high-effort thinking.
-
-For Cursor, also ensure: Settings → Models → paste your Anthropic API key → enable Custom API Key mode. Without this, Cursor uses its own subscription and the proxy captures nothing.
 
 ---
 
@@ -121,11 +146,9 @@ Send the resulting Desktop zip to whoever collects captures.
 
 ## Troubleshooting
 
+- **`SSL error` / `CERTIFICATE_VERIFY_FAILED`** — CA cert not trusted. Redo the "Setup" step for your platform.
 - **`ConnectionRefused`** — the proxy in window A is not running or crashed.
-- **Proxy runs but no logs appear** — Claude wasn't fully quit before relaunching, or `ANTHROPIC_BASE_URL` is mistyped / not set in the current session.
-- **macOS: Desktop / Cursor doesn't route through the proxy** — `open -a` sometimes drops env vars. Fully kill the app (`pkill -f Claude`) and launch the binary directly: `ANTHROPIC_BASE_URL=... /Applications/Claude.app/Contents/MacOS/Claude &`.
-- **Windows: `Start-Process: 系统找不到指定文件` / "cannot find the file"** — don't try to path-launch Claude Desktop. Use the persistent env var method above, then launch normally from the Start Menu.
-- **Windows: Claude Desktop already open before you set the env var** — close it fully (system tray → quit) and reopen from Start Menu so it picks up the new env var.
+- **Proxy runs but no logs appear** — Claude wasn't fully quit before relaunching, or `HTTPS_PROXY` isn't set in the current session.
 - **macOS: `mitmdump: command not found`** — `brew install mitmproxy` didn't complete or PATH wasn't refreshed. Open a new Terminal window and try again.
 - **Cursor traffic missing** — Cursor is on its own subscription. Switch to Custom API Key + Anthropic in settings.
 - **Model shows Opus 5** — pass `--model claude-opus-4-8` on the CLI, or pick 4.8 from the model menu in Desktop / Cursor.
