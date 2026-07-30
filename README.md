@@ -46,11 +46,11 @@ mitmdump --mode reverse:https://api.anthropic.com --listen-port 47821 -s ./save_
 # Claude Code CLI
 ANTHROPIC_BASE_URL=http://localhost:47821 claude --model claude-opus-4-8
 
-# Claude Code Desktop (Cmd+Q it first)
-ANTHROPIC_BASE_URL=http://localhost:47821 open -a "Claude"
+# Claude Code Desktop (fully quit it first with pkill -f Claude)
+ANTHROPIC_BASE_URL=http://localhost:47821 /Applications/Claude.app/Contents/MacOS/Claude &
 
-# Cursor (Cmd+Q it first; requires Custom API Key with Anthropic in settings)
-ANTHROPIC_BASE_URL=http://localhost:47821 open -a "Cursor"
+# Cursor (fully quit it first with pkill -f Cursor; requires Custom API Key with Anthropic in settings)
+ANTHROPIC_BASE_URL=http://localhost:47821 /Applications/Cursor.app/Contents/MacOS/Cursor &
 ```
 
 Inside Claude, run `/effort high` to switch to high-effort thinking.
@@ -123,6 +123,7 @@ Send the resulting Desktop zip to whoever collects captures.
 
 - **`ConnectionRefused`** — the proxy in window A is not running or crashed.
 - **Proxy runs but no logs appear** — Claude wasn't fully quit before relaunching, or `ANTHROPIC_BASE_URL` is mistyped / not set in the current session.
+- **macOS: Desktop / Cursor doesn't route through the proxy** — `open -a` sometimes drops env vars. Fully kill the app (`pkill -f Claude`) and launch the binary directly: `ANTHROPIC_BASE_URL=... /Applications/Claude.app/Contents/MacOS/Claude &`.
 - **Windows: `Start-Process: 系统找不到指定文件` / "cannot find the file"** — don't try to path-launch Claude Desktop. Use the persistent env var method above, then launch normally from the Start Menu.
 - **Windows: Claude Desktop already open before you set the env var** — close it fully (system tray → quit) and reopen from Start Menu so it picks up the new env var.
 - **macOS: `mitmdump: command not found`** — `brew install mitmproxy` didn't complete or PATH wasn't refreshed. Open a new Terminal window and try again.
