@@ -6,9 +6,10 @@ Capture Claude Code / Cursor traffic on macOS or Windows. Output is delivery-rea
 
 ## Download
 
-[Download the latest kit](https://github.com/dongxuny/claude-capture-kit/releases/latest/download/claude-capture-kit.zip) or browse the [Releases page](../../releases).
+Pick your platform's zip from the [Releases page](../../releases):
 
-The kit itself is tiny — just `save_raw.py` and this README. You install `mitmproxy` locally with your platform's package manager.
+- **macOS** → [claude-capture-kit-mac.zip](https://github.com/dongxuny/claude-capture-kit/releases/latest/download/claude-capture-kit-mac.zip) (5KB — you install mitmproxy via Homebrew)
+- **Windows** → [claude-capture-kit-win.zip](https://github.com/dongxuny/claude-capture-kit/releases/latest/download/claude-capture-kit-win.zip) (26MB — includes `mitmdump.exe`)
 
 ## ⚠️ Required settings
 
@@ -21,31 +22,17 @@ Anything else (Opus 5, Sonnet, `medium` effort, etc.) is not acceptable.
 
 ---
 
-## Setup (one-time)
+## Run it — macOS
 
-### macOS
+**One-time**: install mitmproxy.
 
 ```bash
 brew install mitmproxy
 ```
 
-Don't have Homebrew? Run this first: `/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"`.
+Don't have Homebrew? Install it first with `/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"`.
 
-### Windows
-
-```powershell
-winget install mitmproxy.mitmproxy
-```
-
-After it finishes, **close this PowerShell window and open a new one** — otherwise `mitmdump` won't be on `PATH` and you'll see `mitmdump: The term 'mitmdump' is not recognized as a cmdlet`.
-
-Don't have winget? On Windows 10/11 it comes preinstalled. Otherwise download from [mitmproxy.org](https://mitmproxy.org/downloads/).
-
----
-
-## Run it — macOS
-
-Extract the kit zip and open **two Terminal windows** in the extracted folder.
+Then extract the kit zip, `cd` into the folder, and open **two Terminal windows**.
 
 **Terminal A** — start the proxy (keep this window open):
 
@@ -70,17 +57,21 @@ Inside Claude, run `/effort high` to switch to high-effort thinking.
 
 ## Run it — Windows
 
-Extract the kit zip and open **two PowerShell windows** in the extracted folder.
+Extract the kit zip. It already contains `mitmdump.exe` — no separate install needed.
+
+Open **two PowerShell windows** in the extracted folder.
 
 **Window A** — start the proxy (keep this window open):
 
 ```powershell
-mitmdump --mode reverse:https://api.anthropic.com --listen-port 47821 -s .\save_raw.py
+.\mitmdump.exe --mode reverse:https://api.anthropic.com --listen-port 47821 -s .\save_raw.py
 ```
+
+If SmartScreen blocks it: right-click `mitmdump.exe` → Properties → check **Unblock** → OK. Or click **More info → Run anyway** on the SmartScreen dialog.
 
 **Window B** — start Claude:
 
-For **Claude Code CLI**, run in the same PowerShell session:
+For **Claude Code CLI**:
 
 ```powershell
 $env:ANTHROPIC_BASE_URL="http://localhost:47821"; claude --model claude-opus-4-8
@@ -132,8 +123,8 @@ Send the resulting Desktop zip to whoever collects captures.
 
 - **`ConnectionRefused`** — the proxy in window A is not running or crashed.
 - **Proxy runs but no logs appear** — Claude wasn't fully quit before relaunching, or `ANTHROPIC_BASE_URL` is mistyped / not set in the current session.
-- **Windows: `mitmdump: The term 'mitmdump' is not recognized`** — you're using the same PowerShell window where you ran `winget install`. Close it and open a new one.
 - **Windows: `Start-Process: 系统找不到指定文件` / "cannot find the file"** — don't try to path-launch Claude Desktop. Use the persistent env var method above, then launch normally from the Start Menu.
 - **Windows: Claude Desktop already open before you set the env var** — close it fully (system tray → quit) and reopen from Start Menu so it picks up the new env var.
+- **macOS: `mitmdump: command not found`** — `brew install mitmproxy` didn't complete or PATH wasn't refreshed. Open a new Terminal window and try again.
 - **Cursor traffic missing** — Cursor is on its own subscription. Switch to Custom API Key + Anthropic in settings.
 - **Model shows Opus 5** — pass `--model claude-opus-4-8` on the CLI, or pick 4.8 from the model menu in Desktop / Cursor.
