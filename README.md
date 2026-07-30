@@ -6,15 +6,9 @@ Capture Claude Code / Cursor traffic on macOS or Windows. Output is delivery-rea
 
 ## Download
 
-Direct links to the latest release:
+[Download the latest kit](https://github.com/dongxuny/claude-capture-kit/releases/latest/download/claude-capture-kit.zip) or browse the [Releases page](../../releases).
 
-- **macOS Apple Silicon** (M1/M2/M3/M4) → [claude-capture-kit-mac-arm64.zip](https://github.com/dongxuny/claude-capture-kit/releases/latest/download/claude-capture-kit-mac-arm64.zip)
-- **macOS Intel** → [claude-capture-kit-mac-x86_64.zip](https://github.com/dongxuny/claude-capture-kit/releases/latest/download/claude-capture-kit-mac-x86_64.zip)
-- **Windows 10/11 (x64)** → [claude-capture-kit-win.zip](https://github.com/dongxuny/claude-capture-kit/releases/latest/download/claude-capture-kit-win.zip)
-
-Not sure which Mac? Run `uname -m` — `arm64` = arm64 build, `x86_64` = x86_64 build.
-
-Or browse all versions on the [Releases page](../../releases).
+The kit itself is tiny — just `save_raw.py` and this README. You install `mitmproxy` locally with your platform's package manager.
 
 ## ⚠️ Required settings
 
@@ -27,25 +21,34 @@ Anything else (Opus 5, Sonnet, `medium` effort, etc.) is not acceptable.
 
 ---
 
-## Run it — macOS
+## Setup (one-time)
 
-**Before anything else** — extract the zip, move the folder out of `~/Downloads` (macOS restricts Terminal access there), and clear the quarantine flag. If you skip this step, `mitmdump` will fail to start with `Failed to load Python shared lib`.
+### macOS
 
 ```bash
-mv ~/Downloads/claude-capture-kit-mac-arm64 ~/
-xattr -cr ~/claude-capture-kit-mac-arm64
-cd ~/claude-capture-kit-mac-arm64
+brew install mitmproxy
 ```
 
-Now open **two Terminal windows**.
+Don't have Homebrew? Run this first: `/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"`.
+
+### Windows
+
+```powershell
+winget install mitmproxy.mitmproxy
+```
+
+Don't have winget? On Windows 10/11 it comes preinstalled. Otherwise download from [mitmproxy.org](https://mitmproxy.org/downloads/).
+
+---
+
+## Run it — macOS
+
+Extract the kit zip and open **two Terminal windows** in the extracted folder.
 
 **Terminal A** — start the proxy (keep this window open):
 
 ```bash
-./mitmproxy.app/Contents/MacOS/mitmdump \
-  --mode reverse:https://api.anthropic.com \
-  --listen-port 47821 \
-  -s ./save_raw.py
+mitmdump --mode reverse:https://api.anthropic.com --listen-port 47821 -s ./save_raw.py
 ```
 
 **Terminal B** — start Claude (pick one):
@@ -65,33 +68,37 @@ Inside Claude, run `/effort high` to switch to high-effort thinking.
 
 ## Run it — Windows
 
-> **⚠️ SmartScreen may block `mitmdump.exe` on first run.** When it does, click **More info → Run anyway**. Or right-click `mitmdump.exe` → Properties → check **Unblock** → OK.
-
-Extract the zip, `cd` into the folder in **PowerShell**, then open **two PowerShell windows**.
+Extract the kit zip and open **two PowerShell windows** in the extracted folder.
 
 **Window A** — start the proxy (keep this window open):
 
 ```powershell
-.\mitmdump.exe `
-  --mode reverse:https://api.anthropic.com `
-  --listen-port 47821 `
-  -s .\save_raw.py
+mitmdump --mode reverse:https://api.anthropic.com --listen-port 47821 -s .\save_raw.py
 ```
 
-**Window B** — start Claude (pick one):
+**Window B** — start Claude:
+
+For **Claude Code CLI**, run in the same PowerShell session:
 
 ```powershell
-# Claude Code CLI
 $env:ANTHROPIC_BASE_URL="http://localhost:47821"; claude --model claude-opus-4-8
+```
 
-# Claude Code Desktop (close it first)
-$env:ANTHROPIC_BASE_URL="http://localhost:47821"; Start-Process "$env:LOCALAPPDATA\claude\Claude.exe"
+For **Claude Code Desktop / Cursor**, set the env var user-wide, then launch normally from the Start Menu (close any running instance first):
 
-# Cursor (close it first; requires Custom API Key with Anthropic in settings)
-$env:ANTHROPIC_BASE_URL="http://localhost:47821"; Start-Process "$env:LOCALAPPDATA\Programs\cursor\Cursor.exe"
+```powershell
+# Turn capture ON
+[Environment]::SetEnvironmentVariable("ANTHROPIC_BASE_URL", "http://localhost:47821", "User")
+
+# ... close Claude / Cursor if open, then launch them from Start Menu ...
+
+# Turn capture OFF when done (and restart Claude / Cursor)
+[Environment]::SetEnvironmentVariable("ANTHROPIC_BASE_URL", $null, "User")
 ```
 
 Inside Claude, run `/effort high` to switch to high-effort thinking.
+
+For Cursor, also ensure: Settings → Models → paste your Anthropic API key → enable Custom API Key mode. Without this, Cursor uses its own subscription and the proxy captures nothing.
 
 ---
 
@@ -121,10 +128,9 @@ Send the resulting Desktop zip to whoever collects captures.
 
 ## Troubleshooting
 
-- **`mitmdump: Failed to load Python shared lib`** — Gatekeeper is blocking dylibs inside `mitmproxy.app`. Fix with `xattr -cr /path/to/claude-capture-kit-mac-arm64`.
-- **macOS blocks the app / "Terminal wants to access Downloads"** — move the folder out of `~/Downloads`, then `xattr -cr /path/to/folder`.
-- **Windows SmartScreen blocks `mitmdump.exe`** — click **More info → Run anyway**. Or right-click the file → Properties → **Unblock**.
 - **`ConnectionRefused`** — the proxy in window A is not running or crashed.
-- **Proxy runs but no logs appear** — Claude wasn't fully quit before relaunching, or `ANTHROPIC_BASE_URL` is mistyped.
+- **Proxy runs but no logs appear** — Claude wasn't fully quit before relaunching, or `ANTHROPIC_BASE_URL` is mistyped / not set in the current session.
+- **Windows: `Start-Process: 系统找不到指定文件` / "cannot find the file"** — don't try to path-launch Claude Desktop. Use the persistent env var method above, then launch normally from the Start Menu.
+- **Windows: Claude Desktop already open before you set the env var** — close it fully (system tray → quit) and reopen from Start Menu so it picks up the new env var.
 - **Cursor traffic missing** — Cursor is on its own subscription. Switch to Custom API Key + Anthropic in settings.
 - **Model shows Opus 5** — pass `--model claude-opus-4-8` on the CLI, or pick 4.8 from the model menu in Desktop / Cursor.
