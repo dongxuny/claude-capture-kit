@@ -2,6 +2,8 @@
 
 Capture Claude Code / Cursor traffic on macOS or Windows. Output is delivery-ready JSON.
 
+![Kit running: mitmdump on the left, Claude CLI going through the proxy on the right](img/running.png)
+
 ## Download
 
 Direct links to the latest release:
