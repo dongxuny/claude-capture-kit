@@ -96,13 +96,9 @@ Inside Claude, run `/effort high` to switch to high-effort thinking.
 
 ## Where the data goes
 
-Every API call is saved into `data/` next to `save_raw.py`:
+Every API call is saved into `data/` next to `save_raw.py`, grouped by session:
 
-```
-data/
-└── {session_id}/
-    └── {request_id}.json
-```
+![Data folder layout: kit folder containing data/{session_id}/{request_id}.json](img/data.png)
 
 Each file is a single-line, spec-compliant JSON with tokens and Bearer headers auto-redacted.
 
