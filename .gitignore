@@ -1,0 +1,18 @@
+# macOS
+.DS_Store
+
+# Captures / secrets — never commit
+data/
+captured/
+*.zip
+*.tar.gz
+
+# Editor / IDE
+.vscode/
+.idea/
+*.swp
+*~
+
+# Python
+__pycache__/
+*.pyc
