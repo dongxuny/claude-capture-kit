@@ -37,6 +37,8 @@ Don't have Homebrew? Run this first: `/bin/bash -c "$(curl -fsSL https://raw.git
 winget install mitmproxy.mitmproxy
 ```
 
+After it finishes, **close this PowerShell window and open a new one** — otherwise `mitmdump` won't be on `PATH` and you'll see `mitmdump: The term 'mitmdump' is not recognized as a cmdlet`.
+
 Don't have winget? On Windows 10/11 it comes preinstalled. Otherwise download from [mitmproxy.org](https://mitmproxy.org/downloads/).
 
 ---
@@ -130,6 +132,7 @@ Send the resulting Desktop zip to whoever collects captures.
 
 - **`ConnectionRefused`** — the proxy in window A is not running or crashed.
 - **Proxy runs but no logs appear** — Claude wasn't fully quit before relaunching, or `ANTHROPIC_BASE_URL` is mistyped / not set in the current session.
+- **Windows: `mitmdump: The term 'mitmdump' is not recognized`** — you're using the same PowerShell window where you ran `winget install`. Close it and open a new one.
 - **Windows: `Start-Process: 系统找不到指定文件` / "cannot find the file"** — don't try to path-launch Claude Desktop. Use the persistent env var method above, then launch normally from the Start Menu.
 - **Windows: Claude Desktop already open before you set the env var** — close it fully (system tray → quit) and reopen from Start Menu so it picks up the new env var.
 - **Cursor traffic missing** — Cursor is on its own subscription. Switch to Custom API Key + Anthropic in settings.
