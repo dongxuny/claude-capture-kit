@@ -29,14 +29,15 @@ Anything else (Opus 5, Sonnet, `medium` effort, etc.) is not acceptable.
 
 ## Run it — macOS
 
-> **⚠️ Do not run this from `~/Downloads`.** macOS restricts execution and Terminal access in that folder. **Move the extracted folder out of `~/Downloads`** first (Desktop or home directory works), then clear the quarantine flag:
->
-> ```bash
-> mv ~/Downloads/claude-capture-kit-mac-arm64 ~/
-> xattr -cr ~/claude-capture-kit-mac-arm64
-> ```
+**Before anything else** — extract the zip, move the folder out of `~/Downloads` (macOS restricts Terminal access there), and clear the quarantine flag. If you skip this step, `mitmdump` will fail to start with `Failed to load Python shared lib`.
 
-Extract the zip, `cd` into the folder, then open **two Terminal windows**.
+```bash
+mv ~/Downloads/claude-capture-kit-mac-arm64 ~/
+xattr -cr ~/claude-capture-kit-mac-arm64
+cd ~/claude-capture-kit-mac-arm64
+```
+
+Now open **two Terminal windows**.
 
 **Terminal A** — start the proxy (keep this window open):
 
@@ -120,6 +121,7 @@ Send the resulting Desktop zip to whoever collects captures.
 
 ## Troubleshooting
 
+- **`mitmdump: Failed to load Python shared lib`** — Gatekeeper is blocking dylibs inside `mitmproxy.app`. Fix with `xattr -cr /path/to/claude-capture-kit-mac-arm64`.
 - **macOS blocks the app / "Terminal wants to access Downloads"** — move the folder out of `~/Downloads`, then `xattr -cr /path/to/folder`.
 - **Windows SmartScreen blocks `mitmdump.exe`** — click **More info → Run anyway**. Or right-click the file → Properties → **Unblock**.
 - **`ConnectionRefused`** — the proxy in window A is not running or crashed.
