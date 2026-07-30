@@ -27,6 +27,13 @@ Anything else (Opus 5, Sonnet, `medium` effort, etc.) is not acceptable.
 
 ## Run it — macOS
 
+> **⚠️ Do not run this from `~/Downloads`.** macOS restricts execution and Terminal access in that folder. **Move the extracted folder out of `~/Downloads`** first (Desktop or home directory works), then clear the quarantine flag:
+>
+> ```bash
+> mv ~/Downloads/claude-capture-kit-mac-arm64 ~/
+> xattr -cr ~/claude-capture-kit-mac-arm64
+> ```
+
 Extract the zip, `cd` into the folder, then open **two Terminal windows**.
 
 **Terminal A** — start the proxy (keep this window open):
@@ -54,6 +61,8 @@ ANTHROPIC_BASE_URL=http://localhost:47821 open -a "Cursor"
 Inside Claude, run `/effort high` to switch to high-effort thinking.
 
 ## Run it — Windows
+
+> **⚠️ SmartScreen may block `mitmdump.exe` on first run.** When it does, click **More info → Run anyway**. Or right-click `mitmdump.exe` → Properties → check **Unblock** → OK.
 
 Extract the zip, `cd` into the folder in **PowerShell**, then open **two PowerShell windows**.
 
