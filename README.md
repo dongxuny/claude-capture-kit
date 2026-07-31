@@ -15,10 +15,10 @@ Pick your platform's zip from the [Releases page](../../releases):
 
 | Setting | Value |
 |---|---|
-| Model | `claude-opus-4-6` / `claude-opus-4-7` / `claude-opus-4-8` |
+| Model | `claude-opus-4-6` / `claude-opus-4-7` / `claude-opus-4-8` / `claude-opus-5` / `claude-fable-5` |
 | Thinking effort | `high` / `xhigh` / `max` |
 
-Anything else (Opus 5, Sonnet, `medium` effort, etc.) is not acceptable.
+Anything else (Sonnet, Haiku, `medium` effort, etc.) is not acceptable.
 
 ---
 
@@ -162,4 +162,4 @@ Send the resulting Desktop zip to whoever collects captures.
 - **Windows: closed Claude but still no capture** — Claude Desktop minimizes to the system tray on close; it's still running. Open Task Manager, find Claude, End Task. Then relaunch from Start Menu.
 - **macOS: `mitmdump: command not found`** — `brew install mitmproxy` didn't complete or PATH wasn't refreshed. Open a new Terminal window and try again.
 - **Cursor traffic missing** — Cursor is on its own subscription. Switch to Custom API Key + Anthropic in settings.
-- **Model shows Opus 5** — pass `--model claude-opus-4-8` on the CLI, or pick 4.8 from the model menu in Desktop / Cursor.
+- **Wrong model selected** — for the CLI, pass `--model claude-opus-4-8` (or another allowed model) explicitly. For Desktop / Cursor, pick from the model menu.
