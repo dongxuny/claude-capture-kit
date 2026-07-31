@@ -79,10 +79,14 @@ The kit already includes `mitmdump.exe` — no separate install.
 .\mitmdump.exe
 # Wait ~5 seconds after "listening" appears, then Ctrl+C
 
-# 2) Trust the CA cert (elevated PowerShell)
+# 2) Trust the CA cert — user-level, no admin needed
 Import-Certificate -FilePath "$env:USERPROFILE\.mitmproxy\mitmproxy-ca-cert.cer" `
-  -CertStoreLocation Cert:\LocalMachine\Root
+  -CertStoreLocation Cert:\CurrentUser\Root
 ```
+
+Click **Yes** on the "Security Warning" dialog to confirm the trust.
+
+If PowerShell also complains about `Import-Certificate` permissions, install the cert manually instead: open `%USERPROFILE%\.mitmproxy\` in Explorer, double-click `mitmproxy-ca-cert.cer`, click **Install Certificate → Current User → Place all certificates in the following store → Trusted Root Certification Authorities → OK → Yes**.
 
 ## Run it — Windows
 
