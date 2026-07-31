@@ -108,15 +108,21 @@ For **Claude Code CLI**:
 $env:HTTPS_PROXY="http://localhost:47821"; claude --model claude-opus-4-8
 ```
 
-For **Claude Code Desktop / Cursor**, set the env var user-wide, then launch normally from the Start Menu (close any running instance first):
+For **Claude Code Desktop / Cursor**, set the env var user-wide, **fully kill the app**, then launch from the Start Menu:
 
 ```powershell
-# Turn capture ON
+# 1) Turn capture ON
 [Environment]::SetEnvironmentVariable("HTTPS_PROXY", "http://localhost:47821", "User")
 
-# ... close Claude / Cursor if open, then launch them from Start Menu ...
+# 2) FULLY kill Claude / Cursor. Closing the window is not enough — Claude minimizes to the system tray and keeps running. Use one of:
+#    - Task Manager → find Claude / Cursor → End Task
+#    - Or PowerShell:
+Stop-Process -Name "Claude" -Force -ErrorAction SilentlyContinue
+Stop-Process -Name "Cursor" -Force -ErrorAction SilentlyContinue
 
-# Turn capture OFF when done (and restart Claude / Cursor)
+# 3) Launch Claude / Cursor from Start Menu — the new process will pick up HTTPS_PROXY
+
+# 4) Turn capture OFF when done (and kill/restart Claude / Cursor)
 [Environment]::SetEnvironmentVariable("HTTPS_PROXY", $null, "User")
 ```
 
@@ -153,6 +159,7 @@ Send the resulting Desktop zip to whoever collects captures.
 - **`SSL error` / `CERTIFICATE_VERIFY_FAILED`** — CA cert not trusted. Redo the "Setup" step for your platform.
 - **`ConnectionRefused`** — the proxy in window A is not running or crashed.
 - **Proxy runs but no logs appear** — Claude wasn't fully quit before relaunching, or `HTTPS_PROXY` isn't set in the current session.
+- **Windows: closed Claude but still no capture** — Claude Desktop minimizes to the system tray on close; it's still running. Open Task Manager, find Claude, End Task. Then relaunch from Start Menu.
 - **macOS: `mitmdump: command not found`** — `brew install mitmproxy` didn't complete or PATH wasn't refreshed. Open a new Terminal window and try again.
 - **Cursor traffic missing** — Cursor is on its own subscription. Switch to Custom API Key + Anthropic in settings.
 - **Model shows Opus 5** — pass `--model claude-opus-4-8` on the CLI, or pick 4.8 from the model menu in Desktop / Cursor.
