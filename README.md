@@ -17,8 +17,11 @@ Pick your platform's zip from the [Releases page](../../releases):
 |---|---|
 | Model | `claude-opus-4-6` / `claude-opus-4-7` / `claude-opus-4-8` / `claude-opus-5` / `claude-fable-5` |
 | Thinking effort | `high` / `xhigh` / `max` |
+| Desktop tab | **Code** only — not Home |
 
-Anything else (Sonnet, Haiku, `medium` effort, etc.) is not acceptable.
+Anything else (Sonnet, Haiku, `medium` effort, Home-tab chat, etc.) is not acceptable.
+
+**Why Code, not Home?** The Home tab uses `claude.ai`'s internal chat API, not `api.anthropic.com/v1/messages`. Its data format is different from what the spec requires and it produces no `thinking` blocks or `tool_use` blocks. Only Code tab conversations count.
 
 ---
 
@@ -163,3 +166,4 @@ Send the resulting Desktop zip to whoever collects captures.
 - **macOS: `mitmdump: command not found`** — `brew install mitmproxy` didn't complete or PATH wasn't refreshed. Open a new Terminal window and try again.
 - **Cursor traffic missing** — Cursor is on its own subscription. Switch to Custom API Key + Anthropic in settings.
 - **Wrong model selected** — for the CLI, pass `--model claude-opus-4-8` (or another allowed model) explicitly. For Desktop / Cursor, pick from the model menu.
+- **Claude Desktop: chatting in Home tab produces no captures** — Home uses `claude.ai`'s internal API, not `api.anthropic.com`. Switch to the **Code** tab.
