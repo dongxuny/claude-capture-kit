@@ -141,6 +141,16 @@ Every API call is saved into `data/` next to `save_raw.py`, grouped by session:
 
 Each file is a single-line, spec-compliant JSON with tokens and Bearer headers auto-redacted.
 
+`save_raw.py` automatically skips Claude Code's internal helper calls (Haiku title generation, input suggestions, etc.) — only real conversations with an allowed model + `adaptive` thinking + `high`/`xhigh`/`max` effort are saved. To capture everything instead (e.g. for debugging), start the proxy with `CAPTURE_ALL=1`:
+
+```bash
+CAPTURE_ALL=1 mitmdump --listen-port 47821 -s ./save_raw.py
+```
+
+## Updating
+
+Already set up from a previous version? You only need to replace one file — download the latest [`save_raw.py`](save_raw.py), overwrite your copy, and restart mitmdump. No need to reinstall mitmproxy or re-trust the certificate.
+
 ## Send the data
 
 **macOS**:
